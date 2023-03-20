@@ -1,3 +1,4 @@
+import Svg, { Path, Circle } from "react-native-svg";
 import { useState, useEffect } from "react";
 import {
   StyleSheet,
@@ -9,16 +10,16 @@ import {
   TouchableOpacity,
   Keyboard,
   KeyboardAvoidingView,
-  Button,
   Platform,
 } from "react-native";
 
 const initState = {
+  login: "",
   email: "",
   password: "",
 };
 
-export const LoginScreen = () => {
+export const RegistrationScreen = ({ navigation }) => {
   const [state, setState] = useState(initState);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
 
@@ -47,7 +48,7 @@ export const LoginScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <ImageBackground
-          source={require("../assets/images/bg.jpg")}
+          source={require("../../../assets/images/bg.jpg")}
           style={styles.image}
         >
           <KeyboardAvoidingView
@@ -56,10 +57,47 @@ export const LoginScreen = () => {
             <View
               style={{
                 ...styles.form,
-                paddingBottom: isShowKeyboard ? 32 : 144,
+                paddingBottom: isShowKeyboard ? 32 : 78,
               }}
             >
-              <Text style={styles.title}>Войти</Text>
+              <View style={styles.avatar}>
+                <Svg
+                  style={styles.addIcon}
+                  width={25}
+                  height={25}
+                  viewBox="0 0 25 25"
+                >
+                  <Circle
+                    cx="12.5"
+                    cy="12.5"
+                    r="12"
+                    fill="white"
+                    stroke="#FF6C00"
+                  />
+                  <Path
+                    d="M13 6H12V12H6V13H12V19H13V13H19V12H13V6Z"
+                    fill="#FF6C00"
+                  />
+                </Svg>
+              </View>
+              <Text style={styles.title}>Регистрация</Text>
+              <TextInput
+                style={{
+                  ...styles.input,
+                  marginBottom: 16,
+                  borderColor: state.login ? "#FF6C00" : "#E8E8E8",
+                  backgroundColor: state.login ? "#FFF" : "#F6F6F6",
+                }}
+                textAlign={"left"}
+                placeholder="Логин"
+                onFocus={() => {
+                  setIsShowKeyboard(true);
+                }}
+                onChangeText={(value) =>
+                  setState((prevState) => ({ ...prevState, login: value }))
+                }
+                value={state.login}
+              />
               <TextInput
                 style={{
                   ...styles.input,
@@ -101,11 +139,16 @@ export const LoginScreen = () => {
                     activeOpacity={0.8}
                     onPress={keyboardHide}
                   >
-                    <Text style={styles.btnTitle}>Войти</Text>
+                    <Text style={styles.btnTitle}>Зарегистрироваться</Text>
                   </TouchableOpacity>
-                  <Text style={styles.subtitle}>
-                    Нет аккаунта? Зарегистрироваться
-                  </Text>
+                  <View style={styles.redirect}>
+                    <Text style={styles.redirectText}>Нет аккаунта?</Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Login")}
+                    >
+                      <Text style={styles.redirectLink}> Войти</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
             </View>
@@ -126,6 +169,21 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "flex-end",
   },
+  avatar: {
+    position: "absolute",
+    flexDirection: "row",
+    top: -60,
+    width: 120,
+    height: 120,
+    backgroundColor: "#F6F6F6",
+    borderRadius: 16,
+    alignItems: "flex-end",
+  },
+  addIcon: {
+    position: "absolute",
+    right: -12.5,
+    bottom: 14,
+  },
   title: {
     color: "black",
     fontFamily: "Roboto-Medium",
@@ -141,7 +199,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     alignItems: "center",
-    paddingTop: 32,
+    paddingTop: 92,
   },
   input: {
     padding: 16,
@@ -168,8 +226,22 @@ const styles = StyleSheet.create({
   btnTitle: {
     color: "#fff",
     fontSize: 16,
+    fontFamily: "Roboto-Regular",
   },
-  subtitle: {
-    textAlign: "center",
+  redirect: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  redirectText: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    lineHeight: 19,
+  },
+  redirectLink: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    lineHeight: 19,
+    color: "#1B4371",
   },
 });
