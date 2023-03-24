@@ -64,20 +64,21 @@ export const useRoute = (isAuth) => {
         name="Публикации"
         component={PostsScreen}
         options={{
-          headerTitleStyle: {
-            fontSize: 17,
-            fontFamily: "Roboto-Medium",
-            color: "#212121",
-          },
-          headerTitleAlign: "center",
-          headerRight: () => (
-            <MaterialIcons
-              style={{ marginRight: 16 }}
-              name="logout"
-              size={24}
-              color="#BDBDBD"
-            />
-          ),
+          headerShown: false,
+          // headerTitleStyle: {
+          //   fontSize: 17,
+          //   fontFamily: "Roboto-Medium",
+          //   color: "#212121",
+          // },
+          // headerTitleAlign: "center",
+          // headerRight: () => (
+          //   <MaterialIcons
+          //     style={{ marginRight: 16 }}
+          //     name="logout"
+          //     size={24}
+          //     color="#BDBDBD"
+          //   />
+          // ),
           tabBarIcon: ({ focused, size, color }) => (
             <SimpleLineIcons name="grid" size={24} color={color} />
           ),
