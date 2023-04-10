@@ -12,6 +12,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { authSignUpUser } from "../../redux/auth/authOperations";
 
 const initState = {
   login: "",
@@ -23,10 +25,13 @@ export const RegistrationScreen = ({ navigation }) => {
   const [state, setState] = useState(initState);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
 
-  const keyboardHide = () => {
+  const dispatch = useDispatch();
+
+  const handleSubmit = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    console.log(state);
+
+    dispatch(authSignUpUser(state));
     setState(initState);
   };
 
@@ -80,7 +85,7 @@ export const RegistrationScreen = ({ navigation }) => {
                   />
                 </Svg>
               </View>
-              <Text style={styles.title}>Регистрация</Text>
+              <Text style={styles.title}>Register</Text>
               <TextInput
                 style={{
                   ...styles.input,
@@ -89,7 +94,7 @@ export const RegistrationScreen = ({ navigation }) => {
                   backgroundColor: state.login ? "#FFF" : "#F6F6F6",
                 }}
                 textAlign={"left"}
-                placeholder="Логин"
+                placeholder="login"
                 onFocus={() => {
                   setIsShowKeyboard(true);
                 }}
@@ -106,7 +111,7 @@ export const RegistrationScreen = ({ navigation }) => {
                   backgroundColor: state.email ? "#FFF" : "#F6F6F6",
                 }}
                 textAlign={"left"}
-                placeholder="Адрес электронной почты"
+                placeholder="email"
                 onFocus={() => {
                   setIsShowKeyboard(true);
                 }}
@@ -122,7 +127,7 @@ export const RegistrationScreen = ({ navigation }) => {
                   backgroundColor: state.password ? "#FFF" : "#F6F6F6",
                 }}
                 textAlign={"left"}
-                placeholder="Пароль"
+                placeholder="password"
                 secureTextEntry={true}
                 onFocus={() => {
                   setIsShowKeyboard(true);
@@ -137,16 +142,18 @@ export const RegistrationScreen = ({ navigation }) => {
                   <TouchableOpacity
                     style={styles.btn}
                     activeOpacity={0.8}
-                    onPress={keyboardHide}
+                    onPress={handleSubmit}
                   >
-                    <Text style={styles.btnTitle}>Зарегистрироваться</Text>
+                    <Text style={styles.btnTitle}>Register</Text>
                   </TouchableOpacity>
                   <View style={styles.redirect}>
-                    <Text style={styles.redirectText}>Нет аккаунта?</Text>
+                    <Text style={styles.redirectText}>
+                      Already have an account?
+                    </Text>
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Login")}
                     >
-                      <Text style={styles.redirectLink}> Войти</Text>
+                      <Text style={styles.redirectLink}> Log in</Text>
                     </TouchableOpacity>
                   </View>
                 </>

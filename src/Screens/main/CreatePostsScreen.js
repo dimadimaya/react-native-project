@@ -8,9 +8,14 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { Camera } from "expo-camera";
-import { AntDesign } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
+import { db, storage } from "../../firebase/config";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSelector } from "react-redux";
+import { collection, addDoc } from "firebase/firestore";
+import { Camera } from "expo-camera";
+
+import { AntDesign } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { EvilIcons } from "@expo/vector-icons";
 
@@ -23,7 +28,10 @@ const initialPostData = {
 export const CreatePostsScreen = ({ navigation }) => {
   const [postData, setPostData] = useState(initialPostData);
   const [camera, setCamera] = useState(null);
+  const [location, setLocation] = useState(null);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+
+  const { userId, login, email } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -54,23 +62,63 @@ export const CreatePostsScreen = ({ navigation }) => {
   };
 
   const takePhoto = async () => {
+    // console.log(postData.description);
+    // console.log(location);
     try {
       const photo = await camera.takePictureAsync();
       const location = await Location.getCurrentPositionAsync({});
-      console.log("location", location);
-      console.log(location.coords.latitude);
-      console.log(location.coords.longitude);
+      // console.log("location", location);
+      // console.log(location.coords.latitude);
+      // console.log(location.coords.longitude);
+      setLocation(location);
       setPostData((prevState) => ({ ...prevState, photo: photo.uri }));
-      console.log(photo.uri);
+      // console.log(photo.uri);
     } catch (error) {
       console.log(error.message);
     }
   };
 
   const sendFoto = () => {
-    navigation.navigate("DefaultScreen", { postData });
-    console.log("navigation", navigation);
+    uploadPostToServer();
+    navigation.navigate("DefaultScreen");
+    // navigation.navigate("DefaultScreen", { postData });
+    // console.log("navigation", navigation);
     setPostData(initialPostData);
+  };
+
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+    try {
+      const setUserPost = await addDoc(collection(db, "posts"), {
+        photo,
+        description: postData.description,
+        place: postData.place,
+        location: location.coords,
+        userId,
+        login,
+        email,
+      });
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
+
+  const uploadPhotoToServer = async () => {
+    try {
+      const response = await fetch(postData.photo);
+      const file = await response.blob();
+      // console.log(file);
+      await uploadBytes(ref(storage, `postImage/${file._data.blobId}`), file);
+
+      const photoUrl = await getDownloadURL(
+        ref(storage, `postImage/${file._data.blobId}`)
+      );
+      // console.log(photoUrl);
+      return photoUrl;
+    } catch (error) {
+      console.log(error);
+    }
+    return photoUrl;
   };
 
   const remove = () => {
@@ -83,6 +131,7 @@ export const CreatePostsScreen = ({ navigation }) => {
       if (status !== "granted") {
         console.log("Permission to access location was denied");
       }
+      setLocation(location);
     })();
   }, []);
 
@@ -103,14 +152,14 @@ export const CreatePostsScreen = ({ navigation }) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={{ ...styles.input, marginBottom: 16 }}
-            placeholder="Название..."
+            placeholder="Title..."
             onFocus={() => setIsShowKeyboard(true)}
             value={postData.description}
             onChangeText={(value) => handleInput("description", value)}
           />
           <TextInput
             style={{ ...styles.input, paddingLeft: 28 }}
-            placeholder="Местность..."
+            placeholder="Location..."
             onFocus={() => setIsShowKeyboard(true)}
             value={postData.place}
             onChangeText={(value) => handleInput("place", value)}
@@ -141,7 +190,7 @@ export const CreatePostsScreen = ({ navigation }) => {
               color: postData.photo ? "#fff" : "#BDBDBD",
             }}
           >
-            Опубликовать
+            Publish
           </Text>
         </TouchableOpacity>
         <View style={styles.removeContainer}>
@@ -212,15 +261,13 @@ const styles = StyleSheet.create({
     color: "#212121",
   },
   sendBtn: {
-    width: "100%",
     textAlign: "center",
     marginTop: 32,
-    paddingHorizontal: 118,
     paddingVertical: 16,
     backgroundColor: "#FF6C00",
     borderRadius: 100,
   },
-  sendbtnTitle: {
+  btnTitle: {
     color: "#fff",
     textAlign: "center",
     fontSize: 16,

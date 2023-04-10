@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { db } from "../../firebase/config";
+import { collection, onSnapshot, getCountFromServer } from "firebase/firestore";
 import {
   Text,
   View,
@@ -9,18 +11,21 @@ import {
 } from "react-native";
 import { Fontisto, Octicons } from "@expo/vector-icons";
 
-export const DefaultScreenPosts = ({ route, navigation }) => {
+export const DefaultScreenPosts = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
 
-  console.log("route.params", route.params);
-  // console.log("route.params", route.params);
+  const getAllPosts = async () => {
+    const postsRef = collection(db, "posts");
+    onSnapshot(postsRef, (data) => {
+      // console.log(data);
+      return setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    });
+  };
 
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
-    }
-  }, [route.params]);
-  console.log(posts);
+    getAllPosts();
+  }, []);
+  // console.log(posts);
 
   const toMap = () => {
     navigation.navigate("Map");
@@ -42,33 +47,38 @@ export const DefaultScreenPosts = ({ route, navigation }) => {
                 source={require("../../../assets/images/ava.png")}
               />
               <View style={styles.userInfo}>
-                <Text style={styles.userLogin}>Login</Text>
-                <Text style={styles.userEmail}>Email</Text>
+                <Text style={styles.userLogin}>{item.login}</Text>
+                <Text style={styles.userEmail}>{item.email}</Text>
               </View>
             </View>
             <View style={styles.postsContainer}>
-              <Image
-                source={{ uri: item.postData.photo }}
-                style={styles.postImage}
-              />
+              <Image source={{ uri: item.photo }} style={styles.postImage} />
               <View style={styles.postImageContainer}>
-                <Text style={styles.postImageTitle}>
-                  {item.postData.description}
-                </Text>
+                <Text style={styles.postImageTitle}>{item.description}</Text>
               </View>
               <View style={styles.postInfoContainer}>
                 <View style={{ flexDirection: "row" }}>
                   <TouchableOpacity
                     style={styles.postInfoBtn}
-                    onPress={toComment}
+                    onPress={() =>
+                      navigation.navigate("Comments", {
+                        postId: item.id,
+                        photo: item.photo,
+                      })
+                    }
                   >
                     <Fontisto name="comment" size={24} color="#CECDCD" />
-                    <Text style={styles.postInfoText}>0</Text>
+                    <Text style={styles.postInfoText}></Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.postInfoBtn} onPress={toMap}>
+                <TouchableOpacity
+                  style={styles.postInfoBtn}
+                  onPress={() =>
+                    navigation.navigate("Map", { location: item.location })
+                  }
+                >
                   <Octicons name="location" size={24} color="#BDBDBD" />
-                  <Text style={styles.postInfoText}>{item.postData.place}</Text>
+                  <Text style={styles.postInfoText}>{item.place}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -78,6 +88,7 @@ export const DefaultScreenPosts = ({ route, navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

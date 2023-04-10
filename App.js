@@ -1,16 +1,19 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import * as warning from "./ignoreWarning";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
 import { useEffect, useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { useRoute } from "./src/router/useRoute";
+// import { NavigationContainer } from "@react-navigation/native";
+// import { useRoute } from "./src/router/useRoute";
+import { Provider, useSelector } from "react-redux";
+import { store } from "./src/redux/store";
+// import { db } from "./src/firebase/config";
+// import { getAuth } from "firebase/auth";
+import { Main } from "./src/components/main/Main";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const routing = useRoute(true);
 
   useEffect(() => {
     async function prepare() {
@@ -35,5 +38,9 @@ export default function App() {
     return null;
   }
 
-  return <NavigationContainer>{routing}</NavigationContainer>;
+  return (
+    <Provider store={store}>
+      <Main />
+    </Provider>
+  );
 }
